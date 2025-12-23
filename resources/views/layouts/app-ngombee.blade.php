@@ -16,7 +16,6 @@
         [x-cloak] { display: none !important; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass-effect { @apply bg-white/70 backdrop-blur-xl border-white/20; }
-        /* Pastikan konten tetap muncul jika AOS gagal load */
         [data-aos] { opacity: 1 !important; transform: none !important; }
         .aos-init[data-aos] { opacity: 0; }
         .aos-animate[data-aos] { opacity: 1; }
@@ -31,6 +30,7 @@
             userLoggedIn: !!currentUser,
             user: currentUser,
             routeLogin: "{{ route('login') }}",
+            routeRegister: "{{ route('register') }}",
             routeCheckout: "{{ route('checkout') }}"
         };
     </script>
@@ -82,9 +82,11 @@
     </div>
     @endunless
 
+    {{-- Navbar --}}
     <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
 
+            {{-- Logo Section --}}
             <a :href="window.Laravel?.user?.role === 'admin' ? '/admin/dashboard' : '/'"
             class="group flex items-center gap-3"
             x-data>
@@ -99,24 +101,27 @@
                 </div>
             </a>
 
+            {{-- Navigation Menu (Hidden for Admin) --}}
             <div class="hidden md:flex items-center space-x-2" x-data="{ user: window.Laravel?.user }">
                 <template x-if="!user || user.role !== 'admin'">
                     <div class="flex items-center space-x-2">
-                        <a href="/" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->is('/') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Home</a>
-                        <a href="/menu" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->is('menu') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Menu</a>
-                        <a href="/about" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->is('about') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Our Story</a>
-                        <a href="/promo" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->is('promo') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Promo</a>
-                        <a href="/store" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->is('store') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Outlet</a>
+                        <a href="{{ route('home') }}" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->routeIs('home') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Home</a>
+                        <a href="{{ route('menu') }}" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->routeIs('menu') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Menu</a>
+                        <a href="{{ route('about') }}" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->routeIs('about') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Our Story</a>
+                        <a href="{{ route('promo') }}" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->routeIs('promo') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Promo</a>
+                        <a href="{{ route('store') }}" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest {{ request()->routeIs('store') ? 'bg-brand-emerald text-white' : 'text-gray-500' }}">Outlet</a>
                     </div>
                 </template>
             </div>
 
+            {{-- Profile & Auth Section --}}
             <div class="flex items-center gap-4">
                 <div x-data="{ user: window.Laravel?.user }">
+                    {{-- User Is Logged In --}}
                     <template x-if="user">
                         <div class="flex items-center gap-3 bg-white p-1.5 pr-4 rounded-2xl border-2 border-gray-100 shadow-sm">
                             <a :href="user.role === 'admin' ? '/admin/dashboard' : '/dashboard'"
-                            class="w-12 h-12 bg-gray-900 rounded-[18px] flex items-center justify-center text-white font-black hover:bg-brand-emerald transition-colors">
+                               class="w-12 h-12 bg-gray-900 rounded-[18px] flex items-center justify-center text-white font-black hover:bg-brand-emerald transition-colors">
                                 <span x-text="user.name ? user.name.substring(0, 1).toUpperCase() : 'U'"></span>
                             </a>
 
@@ -128,10 +133,16 @@
                         </div>
                     </template>
 
+                    {{-- User Is Guest (Register & Login Buttons) --}}
                     <template x-if="!user">
-                        <a href="/login" class="px-8 py-3 bg-gray-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-emerald transition-colors">
-                            Login
-                        </a>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('login') }}" class="px-6 py-2.5 text-gray-700 font-black text-xs uppercase tracking-widest hover:text-brand-emerald transition-colors">
+                                Login
+                            </a>
+                            <a href="{{ route('register') }}" class="px-8 py-3 bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-100 hover:scale-[1.05] transition-all">
+                                Register
+                            </a>
+                        </div>
                     </template>
                 </div>
             </div>
@@ -145,7 +156,6 @@
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // ✅ Inisialisasi AOS agar konten muncul
         AOS.init({
             duration: 800,
             once: true,

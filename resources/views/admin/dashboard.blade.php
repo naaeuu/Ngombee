@@ -5,10 +5,7 @@
 @section('content')
 <div class="pt-32 pb-20 bg-gray-50 min-h-screen" x-data="adminDashboard()">
     <div class="max-w-7xl mx-auto px-6">
-        <div class="flex justify-between items-center mb-12">
-            <h1 class="text-4xl font-black">ADMIN <span class="text-brand-emerald">DASHBOARD</span></h1>
-            <button @click="logout" class="bg-rose-500 text-white px-6 py-2 rounded-xl">Logout</button>
-        </div>
+
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
             <div class="bg-white p-6 rounded-xl shadow">
