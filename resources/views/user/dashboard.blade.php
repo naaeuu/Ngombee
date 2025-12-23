@@ -6,7 +6,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
             <div>
                 <h1 class="text-4xl font-black text-gray-900 uppercase">Member <span class="text-brand-emerald italic">Area</span></h1>
-                <p class="text-gray-500 font-bold">Selamat datang kembali, {{ Auth::user()->name }}! 👋</p>
+                <p class="text-gray-500 font-bold">Selamat datang kembali, <span id="user-name-display" class="text-brand-emerald">User</span>!</p>
             </div>
             <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
                 <div class="text-right">
@@ -57,3 +57,10 @@
     </div>
 </div>
 @endsection
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const userName = window.Laravel?.user?.name || 'Member';
+        const display = document.getElementById('user-name-display');
+        if (display) display.innerText = userName;
+    });
+</script>

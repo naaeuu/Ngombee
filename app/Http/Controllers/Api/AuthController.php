@@ -5,24 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
-    /**
-     * Create a new AuthController instance.
-     */
     public function __construct()
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
-    /**
-     * Get a JWT via given credentials.
-     */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -31,35 +24,48 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $credentials = $request->only('email', 'password');
 
         try {
+            // Coba login
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Email atau password salah.'
                 ], 401);
             }
+
+            // ✅ AMBIL USER LANGSUNG DARI DATABASE BERDASARKAN EMAIL
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak ditemukan.'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+                'user' => $user // ✅ PASTI TIDAK NULL
+            ]);
+
         } catch (JWTException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membuat token.'
             ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'token' => $token,
-            'user' => Auth::guard('api')->user()
-        ]);
     }
 
-    /**
-     * Register a new user.
-     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -69,7 +75,11 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $user = User::create([
@@ -88,17 +98,11 @@ class AuthController extends Controller
         ], 201);
     }
 
-    /**
-     * Get the authenticated User.
-     */
     public function me()
     {
         return response()->json(auth()->user());
     }
 
-    /**
-     * Log the user out (Invalidate the token).
-     */
     public function logout()
     {
         auth()->logout();

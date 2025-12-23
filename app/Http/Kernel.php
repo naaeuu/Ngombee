@@ -54,7 +54,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
         // ✅ DUA MIDDLEWARE ROLE: SATU UNTUK WEB, SATU UNTUK API
-        'role' => \App\Http\Middleware\RoleMiddleware::class,          // Untuk session (web)
+        'role' => \App\Http\Middleware\RoleApiMiddleware::class,        // Untuk session (web)
         'role.api' => \App\Http\Middleware\RoleApiMiddleware::class,   // Untuk JWT (api)
     ];
 }
