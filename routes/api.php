@@ -12,26 +12,26 @@ use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
 |--------------------------------------------------------------------------
 */
 
-// 🔓 Routes Publik (Tidak perlu autentikasi)
+//Routes Publik (Tidak perlu autentikasi)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// 🔒 Routes Terproteksi (Butuh JWT Token)
+//Routes Terproteksi (Butuh JWT Token)
 Route::middleware('auth:api')->group(function () {
 
-    // ✅ Endpoint Umum
+    //Endpoint Umum
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // 👤 User biasa
+    //User biasa
     Route::prefix('user')->group(function () {
         Route::post('/checkout', [CheckoutController::class, 'store']);
     });
 
-    // ✅ Route eksplisit untuk direct-checkout — pastikan Auth::id() tersedia
+    // oute eksplisit untuk direct-checkout
     Route::post('/user/direct-checkout', [CheckoutController::class, 'directStore']);
 
-    // 👑 Admin only
+    // Admin only
     Route::middleware('role.api:admin')->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminProductController::class, 'index']);
         Route::post('/products', [AdminProductController::class, 'store']);

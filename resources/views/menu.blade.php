@@ -12,6 +12,7 @@
             <p class="text-gray-500 font-bold uppercase tracking-[0.3em] text-xs">Pilih Minuman Segar Favoritmu</p>
         </div>
 
+        {{-- Filter Kategori --}}
         <div class="flex flex-wrap justify-center gap-3 mb-20">
             <button @click="activeCategory = 'all'"
                 :class="activeCategory === 'all' ? 'bg-gray-900 text-white shadow-xl scale-105' : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-200'"
@@ -28,19 +29,27 @@
             </template>
         </div>
 
+        {{-- Grid Produk --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <template x-for="item in filteredItems" :key="item.id">
                 <div class="group relative bg-white rounded-[2.5rem] p-6 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full">
+
+                    {{-- Tag Kategori --}}
                     <div class="absolute top-6 left-6 z-10">
                         <span class="bg-gray-900/5 backdrop-blur-md text-gray-900 text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-tighter" x-text="item.category?.name || 'Drink'"></span>
                     </div>
 
-                    <div class="relative h-56 mb-6 rounded-[2rem] bg-gray-50 overflow-hidden flex items-center justify-center transition-colors group-hover:bg-brand-emerald/5">
+                    {{-- Link Detail via Gambar --}}
+                    <a :href="'/menu/' + item.slug" class="relative h-56 mb-6 rounded-[2rem] bg-gray-50 overflow-hidden flex items-center justify-center transition-colors group-hover:bg-brand-emerald/5 cursor-pointer">
                         <div class="text-7xl transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-500 drop-shadow-2xl">🥤</div>
-                    </div>
+                    </a>
 
                     <div class="text-left flex-grow">
-                        <h3 class="font-black text-xl text-gray-900 mb-1 leading-tight group-hover:text-brand-emerald transition-colors" x-text="item.name"></h3>
+                        {{-- Link Detail via Judul --}}
+                        <a :href="'/menu/' + item.slug" class="block group">
+                            <h3 class="font-black text-xl text-gray-900 mb-1 leading-tight group-hover:text-brand-emerald transition-colors" x-text="item.name"></h3>
+                        </a>
+
                         <div class="flex justify-between items-center mb-4">
                             <p class="text-brand-emerald font-black text-lg">Rp <span x-text="item.price.toLocaleString('id-ID')"></span></p>
                             <span :class="item.stock > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
@@ -50,6 +59,7 @@
                         </div>
                     </div>
 
+                    {{-- Action Buttons --}}
                     <div class="mt-auto pt-4 border-t border-gray-50">
                         <template x-if="item.stock <= 0">
                             <button disabled class="w-full bg-gray-100 text-gray-400 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest cursor-not-allowed">
@@ -59,7 +69,6 @@
 
                         <template x-if="item.stock > 0">
                             <div>
-                                <!-- Tampilan saat sudah di keranjang -->
                                 <div x-show="getCartQty(item.id) > 0"
                                      class="flex items-center justify-between w-full bg-gray-900 rounded-2xl p-1.5 text-white shadow-inner">
                                     <button @click.stop="updateCart('remove', item)" class="w-10 h-10 flex items-center justify-center font-black rounded-xl bg-white/10 hover:bg-white/20 transition-colors">−</button>
@@ -70,7 +79,6 @@
                                             :class="{'opacity-20 cursor-not-allowed': getCartQty(item.id) >= item.stock}">+</button>
                                 </div>
 
-                                <!-- Tampilan saat belum di keranjang -->
                                 <button x-show="getCartQty(item.id) === 0"
                                     @click.stop="updateCart('add', item)"
                                     class="w-full bg-brand-emerald hover:bg-gray-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all duration-300 shadow-md">
@@ -78,6 +86,11 @@
                                 </button>
                             </div>
                         </template>
+
+                        {{-- Tombol Detail Tambahan --}}
+                        <a :href="'/menu/' + item.slug" class="block text-center mt-3 text-[9px] font-black text-gray-400 hover:text-brand-emerald uppercase tracking-widest transition-colors">
+                            Lihat Detail Produk
+                        </a>
                     </div>
                 </div>
             </template>
@@ -91,7 +104,6 @@
             activeCategory: 'all',
             categories: @json($categories),
             items: @json($products),
-            // State internal untuk memicu re-render Alpine
             cartVersion: 0,
 
             get filteredItems() {
@@ -99,7 +111,6 @@
                 return this.items.filter(i => String(i.category_id) === String(this.activeCategory));
             },
 
-            // Listener untuk update versi keranjang
             init() {
                 window.addEventListener('cart-updated', () => {
                     this.cartVersion++;
@@ -107,7 +118,6 @@
             },
 
             getCartQty(id) {
-                // cartVersion digunakan di sini agar Alpine tahu fungsi ini harus dihitung ulang
                 this.cartVersion;
                 const cart = JSON.parse(localStorage.getItem('ngombee_cart') || '[]');
                 const item = cart.find(i => i.id === id);
@@ -121,8 +131,6 @@
                 }
 
                 let cart = JSON.parse(localStorage.getItem('ngombee_cart') || '[]');
-
-                // Pastikan item.id adalah angka agar pencarian akurat
                 let found = cart.find(i => i.id === item.id);
 
                 if (action === 'add') {
@@ -134,13 +142,13 @@
                             return;
                         }
                     } else {
-                        // BERSIHKAN DATA: Pastikan price dan stock hanya angka
                         cart.push({
                             id: item.id,
                             name: item.name,
                             price: Number(item.price),
                             quantity: 1,
-                            stock: Number(item.stock)
+                            stock: Number(item.stock),
+                            slug: item.slug // Simpan slug juga di keranjang jika perlu
                         });
                     }
                 } else {
